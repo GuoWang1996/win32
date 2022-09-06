@@ -1,21 +1,34 @@
 #include <windows.h> 
 #include "TCHAR.H"
-//窗口处理函数(自定义，处理消息)
-LRESULT CALLBACK WindProc(HWND hwnd,UINT msgID,WPARAM wPARAM,LPARAM lparam) {
-	
-		if (msgID == WM_DESTROY) {
-			PostQuitMessage(0);			//此消息导致GetMessage函数返回零
-		}
+#include "stdio.h"
 
-	
-	return DefWindowProc(hwnd, msgID, wPARAM,lparam);
+HANDLE  handle = 0;
+void wmCreate(HWND hwnd, LPARAM lparam) {
+	CREATESTRUCT* s=(CREATESTRUCT*)lparam;
+	char* str = (char*)s->lpszName;//强转成字符串
+	MessageBox(NULL, str, "test333", MB_YESNO);
+	//为什么EDIT就能创建成功,自定义窗口就不行
+	CreateWindowEx(0,"EDIT", "标题", WS_CHILD | WS_VISIBLE |WS_BORDER, 0, 0, 200, 200, hwnd, NULL, 0,NULL);
 }
+void wmSize(HWND hwnd, LPARAM lparam) {
+	short x = LOWORD(lparam);
+	short y = HIWORD(lparam);
+	char str[256] = {0};
+	sprintf(str, "宽:%d,高:%d\n", x, y);
+
+	WriteConsole(handle, str, strlen(str), NULL, NULL);
+
+}
+LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam);
+
 int WINAPI _tWinMain(
 	HINSTANCE hInctance,
 	HINSTANCE hPrevInctance,
 	LPSTR lpCmdLine,
 	int nCmdShow
 ) {
+	AllocConsole();//增加DOS窗口
+	handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	//1.注册窗口类
 	WNDCLASS wc = { 0 };
 	wc.cbClsExtra = 0;//申请缓冲区
@@ -44,7 +57,7 @@ int WINAPI _tWinMain(
 	wc.style = CS_HREDRAW | CS_VREDRAW;//检测窗口位置变化刷新绘制
 	RegisterClass(&wc);//将窗口类写入操作系统
 	//创建子窗口
-	HWND hwnd2 = CreateWindowEx(0,"子窗口", "标题",WS_CHILD|WS_VISIBLE| WS_OVERLAPPEDWINDOW, 100, 100, 200, 200, hwnd, NULL, hInctance, (LPVOID)NULL);
+	HWND hwnd2 = CreateWindow("子窗口", "标题",WS_CHILD|WS_VISIBLE| WS_OVERLAPPEDWINDOW, 100, 100, 200, 200, hwnd, NULL, hInctance, (LPVOID)NULL);
 	//3.显示窗口
 	ShowWindow(hwnd,SW_SHOW);//原样刷新显示
 	UpdateWindow(hwnd);//刷新窗口 防止漏加载资源
@@ -58,4 +71,30 @@ int WINAPI _tWinMain(
 		DispatchMessage(&nMSG);//派发消息  交给窗口处理函数处理
 	}
 	return 0;
+}
+//窗口处理函数(自定义，处理消息)
+LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam) {
+	switch (msgID)
+	{
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	case WM_SYSCOMMAND:
+		if (wPARAM == SC_CLOSE)
+		{
+			if (MessageBox(NULL, "是否退出", "test333", MB_YESNO) == IDNO)
+			{
+				return 0;
+			}
+		}
+		break;
+	case WM_CREATE:
+		wmCreate(hwnd, lparam);
+		break;
+	case WM_SIZE:
+		wmSize(hwnd, lparam);
+		break;
+	}
+	
+	return DefWindowProc(hwnd, msgID, wPARAM, lparam);
 }

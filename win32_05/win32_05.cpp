@@ -1,23 +1,20 @@
 #include <windows.h> 
 #include "TCHAR.H"
 #include "stdio.h"
-
+#define WM_MYMESSGAE WM_USER+1000
 HANDLE  handle = 0;
-void wmCreate(HWND hwnd, LPARAM lparam) {
-	CREATESTRUCT* s=(CREATESTRUCT*)lparam;
-	char* str = (char*)s->lpszName;//强转成字符串
-	MessageBox(NULL, str, "wmCreate", MB_YESNO);
-	//为什么EDIT就能创建成功,自定义窗口就不行
-	CreateWindowEx(0,"EDIT", "标题", WS_CHILD | WS_VISIBLE |WS_BORDER, 0, 0, 200, 200, hwnd, NULL, 0,NULL);
-}
+
 void wmSize(HWND hwnd, LPARAM lparam) {
 	short x = LOWORD(lparam);
 	short y = HIWORD(lparam);
-	char str[256] = {0};
+	char str[256] = { 0 };
 	sprintf(str, "宽:%d,高:%d\n", x, y);
 
 	WriteConsole(handle, str, strlen(str), NULL, NULL);
 
+}
+void myMessage() {
+	MessageBox(NULL, "这是我自己定义的消息", "wmCreate", MB_YESNO);
 }
 LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam);
 
@@ -43,7 +40,7 @@ int WINAPI _tWinMain(
 	wc.style = CS_HREDRAW | CS_VREDRAW;//检测窗口位置变化刷新绘制
 	RegisterClass(&wc);//将窗口类写入操作系统
 	//2.在内存中申请创建内存
-	HWND hwnd= CreateWindow("窗口名称","主窗口",WS_OVERLAPPEDWINDOW,100,100,500,500,NULL,NULL, hInctance, (LPVOID)NULL);
+	HWND hwnd = CreateWindow("窗口名称", "主窗口", WS_OVERLAPPEDWINDOW, 100, 100, 500, 500, NULL, NULL, hInctance, (LPVOID)NULL);
 	//注册子窗口
 	wc.cbClsExtra = 0;//申请缓冲区
 	wc.cbWndExtra = 0;
@@ -57,18 +54,32 @@ int WINAPI _tWinMain(
 	wc.style = CS_HREDRAW | CS_VREDRAW;//检测窗口位置变化刷新绘制
 	RegisterClass(&wc);//将窗口类写入操作系统
 	//创建子窗口
-	HWND hwnd2 = CreateWindow("子窗口", "子窗口",WS_CHILD|WS_VISIBLE| WS_OVERLAPPEDWINDOW, 100, 100, 200, 200, hwnd, NULL, hInctance, (LPVOID)NULL);
+	HWND hwnd2 = CreateWindow("子窗口", "子窗口", WS_CHILD | WS_VISIBLE | WS_OVERLAPPEDWINDOW, 100, 100, 200, 200, hwnd, NULL, hInctance, (LPVOID)NULL);
 	//3.显示窗口
-	ShowWindow(hwnd,SW_SHOW);//原样刷新显示
+	ShowWindow(hwnd, SW_SHOW);//原样刷新显示
 	UpdateWindow(hwnd);//刷新窗口 防止漏加载资源
 	//消息循环
-	MSG nMSG = {0};
-	while (GetMessage(&nMSG, NULL, 0, 0)) //如果函数检索到WM_QUIT以外的消息，则返回值非零。
-
-										 //如果函数检索到WM_QUIT消息，则返回值为零。WM_QUIT表示终止应用程序的请求
+	MSG nMSG = { 0 };
+	while (1) //如果函数检索到WM_QUIT以外的消息，则返回值非零。
+			 //如果函数检索到WM_QUIT消息，则返回值为零。WM_QUIT表示终止应用程序的请求
 	{
-		TranslateMessage(&nMSG);//翻译消息
-		DispatchMessage(&nMSG);//派发消息  交给窗口处理函数处理
+		
+		if (PeekMessage(&nMSG, NULL, 0, 0,PM_NOREMOVE)) {//侦察消息，无消息返回false
+			if (GetMessage(&nMSG, NULL, 0, 0))
+			{
+				TranslateMessage(&nMSG);//翻译消息
+				DispatchMessage(&nMSG);//派发消息  交给窗口处理函数处理
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else {
+			WriteConsole(handle, "无消息！", strlen("无消息！"), NULL, NULL);
+			Sleep(100);//while循环太快了 睡一下打印输出，观察窗口变化输出是否正常
+		}
+		
 	}
 	return 0;
 }
@@ -77,7 +88,8 @@ LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam) {
 	switch (msgID)
 	{
 	case WM_DESTROY:
-		PostQuitMessage(0);
+		//SendMessage(hwnd, WM_QUIT, wPARAM, lparam);
+		PostMessage(hwnd, WM_QUIT, wPARAM, lparam);
 		break;
 	case WM_SYSCOMMAND:
 		if (wPARAM == SC_CLOSE)
@@ -88,13 +100,14 @@ LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam) {
 			}
 		}
 		break;
-	case WM_CREATE:
-		wmCreate(hwnd, lparam);
-		break;
 	case WM_SIZE:
+		PostMessage(hwnd, WM_MYMESSGAE, wPARAM, lparam);
 		wmSize(hwnd, lparam);
 		break;
+	case WM_MYMESSGAE:
+		myMessage();
+		break;
 	}
-	
+
 	return DefWindowProc(hwnd, msgID, wPARAM, lparam);
 }

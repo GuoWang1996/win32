@@ -16,6 +16,17 @@ void wmSize(HWND hwnd, LPARAM lparam) {
 void myMessage() {
 	MessageBox(NULL, "这是我自己定义的消息", "wmCreate", MB_YESNO);
 }
+void myPaint() {
+	WriteConsole(handle, "这是我自己定义的窗口消息！", strlen("这是我自己定义的窗口消息！"), NULL, NULL);
+}
+void myMouseMove(LPARAM lparam) {
+	POINTS points = MAKEPOINTS(lparam);
+	short x=points.x;
+	short y = points.y;
+	char str[256] = { 0 };
+	sprintf(str, "x:%d,y:%d\n", x, y);
+	WriteConsole(handle, str, strlen(str), NULL, NULL);
+}
 LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam);
 
 int WINAPI _tWinMain(
@@ -30,7 +41,7 @@ int WINAPI _tWinMain(
 	WNDCLASS wc = { 0 };
 	wc.cbClsExtra = 0;//申请缓冲区
 	wc.cbWndExtra = 0;
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);//设置窗口背景
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW );//设置窗口背景
 	wc.hCursor = NULL;//默认光标
 	wc.hIcon = NULL;//默认图标
 	wc.hInstance = hInctance;//当前程序实例句柄
@@ -76,7 +87,7 @@ int WINAPI _tWinMain(
 			}
 		}
 		else {
-			WriteConsole(handle, "无消息！", strlen("无消息！"), NULL, NULL);
+			//WriteConsole(handle, "无消息！", strlen("无消息！"), NULL, NULL);
 			Sleep(100);//while循环太快了 睡一下打印输出，观察窗口变化输出是否正常
 		}
 		
@@ -106,6 +117,15 @@ LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam) {
 		break;
 	case WM_MYMESSGAE:
 		myMessage();
+		break;
+	case WM_PAINT:
+		myPaint();
+		break;
+	case WM_LBUTTONDOWN:
+		InvalidateRect(hwnd,NULL,false);
+		break;
+	case WM_MOUSEMOVE:
+		myMouseMove(lparam);
 		break;
 	}
 

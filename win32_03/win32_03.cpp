@@ -6,7 +6,7 @@ HANDLE  handle = 0;
 void wmCreate(HWND hwnd, LPARAM lparam) {
 	CREATESTRUCT* s=(CREATESTRUCT*)lparam;
 	char* str = (char*)s->lpszName;//强转成字符串
-	MessageBox(NULL, str, "wmCreate", MB_YESNO);
+	MessageBox(NULL, str, "test333", MB_YESNO);
 	//为什么EDIT就能创建成功,自定义窗口就不行
 	CreateWindowEx(0,"EDIT", "标题", WS_CHILD | WS_VISIBLE |WS_BORDER, 0, 0, 200, 200, hwnd, NULL, 0,NULL);
 }
@@ -43,7 +43,7 @@ int WINAPI _tWinMain(
 	wc.style = CS_HREDRAW | CS_VREDRAW;//检测窗口位置变化刷新绘制
 	RegisterClass(&wc);//将窗口类写入操作系统
 	//2.在内存中申请创建内存
-	HWND hwnd= CreateWindow("窗口名称","主窗口",WS_OVERLAPPEDWINDOW,100,100,500,500,NULL,NULL, hInctance, (LPVOID)NULL);
+	HWND hwnd= CreateWindow("窗口名称","标题",WS_OVERLAPPEDWINDOW,100,100,500,500,NULL,NULL, hInctance, (LPVOID)NULL);
 	//注册子窗口
 	wc.cbClsExtra = 0;//申请缓冲区
 	wc.cbWndExtra = 0;
@@ -57,7 +57,7 @@ int WINAPI _tWinMain(
 	wc.style = CS_HREDRAW | CS_VREDRAW;//检测窗口位置变化刷新绘制
 	RegisterClass(&wc);//将窗口类写入操作系统
 	//创建子窗口
-	HWND hwnd2 = CreateWindow("子窗口", "子窗口",WS_CHILD|WS_VISIBLE| WS_OVERLAPPEDWINDOW, 100, 100, 200, 200, hwnd, NULL, hInctance, (LPVOID)NULL);
+	HWND hwnd2 = CreateWindow("子窗口", "标题",WS_CHILD|WS_VISIBLE| WS_OVERLAPPEDWINDOW, 100, 100, 200, 200, hwnd, NULL, hInctance, (LPVOID)NULL);
 	//3.显示窗口
 	ShowWindow(hwnd,SW_SHOW);//原样刷新显示
 	UpdateWindow(hwnd);//刷新窗口 防止漏加载资源

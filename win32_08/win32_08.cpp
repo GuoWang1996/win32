@@ -12,16 +12,7 @@ HANDLE  handle = 0;
 
 long CalculateRemainingLifetime(std::tm& birthDt, int expectedLifeYears);
 
-VOID onCreate(LPARAM lParam) {
-	CREATESTRUCT* s = (CREATESTRUCT*)lParam;
-	char* str=(char*)s->lpCreateParams;
-	//MessageBox(NULL, str, "提示", MB_OK);
-}
-void onTimer() {
-	char str[280] = { 0 };
-	sprintf(str, "时间:%d\n", 1);
-	WriteConsole(handle, str, strlen(str), NULL, NULL);
-}
+
 //定义窗口处理函数
 LRESULT CALLBACK WindProc(HWND hwnd, UINT msgID, WPARAM wPARAM, LPARAM lparam) {
 

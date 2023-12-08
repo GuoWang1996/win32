@@ -18,5 +18,35 @@
     <ClCompile Include="day1.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="duiLibdemo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlDemo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="day1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="duiLibdemo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlDemo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="duilib.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="win32.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
